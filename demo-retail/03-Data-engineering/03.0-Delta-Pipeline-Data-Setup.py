@@ -1,21 +1,7 @@
 # Databricks notebook source
-import os
-
-# COMMAND ----------
-
-print()
-/Workspace/Repos/flavio.malavazi@databricks.com/databricks-data-journey-brasil/demo-retail/_data/users_json.tar.gz
-
-# COMMAND ----------
-
-from os import listdir
-
-# COMMAND ----------
-
 username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
 
 # COMMAND ----------
-
 
 # importing the "tarfile" module
 import tarfile
@@ -30,5 +16,5 @@ file.close()
 
 # COMMAND ----------
 
-# MAGIC %fs
-# MAGIC ls
+# from os import listdir
+# listdir(f"""/dbfs/user/{username}/demo-retail/_data/users_json/""")
