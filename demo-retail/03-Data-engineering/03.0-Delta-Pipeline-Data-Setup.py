@@ -30,5 +30,4 @@ file.close()
 
 # COMMAND ----------
 
-# MAGIC %fs
-# MAGIC ls
+listdir(f"""/dbfs/user/{username}/demo-retail/_data/users_json/""")
