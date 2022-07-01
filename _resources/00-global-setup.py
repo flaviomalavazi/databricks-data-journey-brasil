@@ -93,28 +93,30 @@ username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().use
 demo_file = dbutils.widgets.get("db_prefix")
 
 # Decompress user data:
-file = tarfile.open(f"""/Workspace{dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get().split(f"_resources")[0]}demo-{demo_file}/_data/users_json.tar.gz""")
+file = tarfile.open(f"""/Workspace{dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get().split(f"demo-{demo_file}")[0]}/demo-{demo_file}/_data/users_json.tar.gz""")
 
 # extracting file
 file.extractall(f"""/dbfs/user/{username}/demo-{demo_file}/_data/users_json/""")
 
 file.close()
 
-json_directory = f"""/dbfs/user/{username}/demo-retail/_data/users_json/"""
+json_directory = f"""/user/{username}/demo-retail/_data/users_json/"""
 
 # Decompress spend data
-file = tarfile.open(f"""/Workspace{dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get().split(f"_resources")[0]}demo-{demo_file}/_data/spend_csv.tar.gz""")
+file = tarfile.open(f"""/Workspace{dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get().split(f"demo-{demo_file}")[0]}/demo-{demo_file}/_data/spend_csv.tar.gz""")
 
 # extracting file
 file.extractall(f"""/dbfs/user/{username}/demo-{demo_file}/_data/spend_csv/""")
 
 file.close()
 
-csv_directory = f"""/dbfs/user/{username}/demo-retail/_data/spend_csv/"""
+csv_directory = f"""/user/{username}/demo-retail/_data/spend_csv/"""
+
+reset_all = dbutils.widgets.get("reset_all_data") == "true"
 
 if reset_all:
-  dbutils.fs.rm(csv_directory.split("/dbfs")[1], True)
-  dbutils.fs.rm(json_directory.split("/dbfs")[1], True)
+  dbutils.fs.rm(csv_directory, True)
+  dbutils.fs.rm(json_directory, True)
 
 # COMMAND ----------
 
@@ -131,7 +133,7 @@ current_user_no_at = re.sub(r'\W+', '_', current_user_no_at)
 db_prefix = dbutils.widgets.get("db_prefix")
 
 dbName = db_prefix+"_"+current_user_no_at
-cloud_storage_path = f"/Users/{current_user}/field_demos/{db_prefix}"
+cloud_storage_path = f"/Users/{current_user}/demos/{db_prefix}"
 reset_all = dbutils.widgets.get("reset_all_data") == "true"
 
 if reset_all:
@@ -186,65 +188,65 @@ def wait_for_all_stream():
 
 # COMMAND ----------
 
-from pyspark.sql.functions import col
-from databricks.feature_store import FeatureStoreClient
-import mlflow
+# from pyspark.sql.functions import col
+# # from databricks.feature_store import FeatureStoreClient
+# import mlflow
 
-import databricks
-from databricks import automl
-from datetime import datetime
+# import databricks
+# from databricks import automl
+# from datetime import datetime
 
-def get_automl_run(name):
-  #get the most recent automl run
-  df = spark.table("field_demos_metadata.automl_experiment").filter(col("name") == name).orderBy(col("date").desc()).limit(1)
-  return df.collect()
+# def get_automl_run(name):
+#   #get the most recent automl run
+#   df = spark.table("field_demos_metadata.automl_experiment").filter(col("name") == name).orderBy(col("date").desc()).limit(1)
+#   return df.collect()
 
-#Get the automl run information from the field_demos_metadata.automl_experiment table. 
-#If it's not available in the metadata table, start a new run with the given parameters
-def get_automl_run_or_start(name, model_name, dataset, target_col, timeout_minutes, move_to_production = False):
-  spark.sql("create database if not exists field_demos_metadata")
-  spark.sql("create table if not exists field_demos_metadata.automl_experiment (name string, date string)")
-  result = get_automl_run(name)
-  if len(result) == 0:
-    print("No run available, start a new Auto ML run, this will take a few minutes...")
-    start_automl_run(name, model_name, dataset, target_col, timeout_minutes, move_to_production)
-    result = get_automl_run(name)
-  return result[0]
+# #Get the automl run information from the field_demos_metadata.automl_experiment table. 
+# #If it's not available in the metadata table, start a new run with the given parameters
+# def get_automl_run_or_start(name, model_name, dataset, target_col, timeout_minutes, move_to_production = False):
+#   spark.sql("create database if not exists field_demos_metadata")
+#   spark.sql("create table if not exists field_demos_metadata.automl_experiment (name string, date string)")
+#   result = get_automl_run(name)
+#   if len(result) == 0:
+#     print("No run available, start a new Auto ML run, this will take a few minutes...")
+#     start_automl_run(name, model_name, dataset, target_col, timeout_minutes, move_to_production)
+#     result = get_automl_run(name)
+#   return result[0]
 
 
-#Start a new auto ml classification task and save it as metadata.
-def start_automl_run(name, model_name, dataset, target_col, timeout_minutes = 5, move_to_production = False):
-  automl_run = databricks.automl.classify(
-    dataset = dataset,
-    target_col = target_col,
-    timeout_minutes = timeout_minutes
-  )
-  experiment_id = automl_run.experiment.experiment_id
-  path = automl_run.experiment.name
-  data_run_id = mlflow.search_runs(experiment_ids=[automl_run.experiment.experiment_id], filter_string = "tags.mlflow.source.name='Notebook: DataExploration'").iloc[0].run_id
-  exploration_notebook_id = automl_run.experiment.tags["_databricks_automl.exploration_notebook_id"]
-  best_trial_notebook_id = automl_run.experiment.tags["_databricks_automl.best_trial_notebook_id"]
+# #Start a new auto ml classification task and save it as metadata.
+# def start_automl_run(name, model_name, dataset, target_col, timeout_minutes = 5, move_to_production = False):
+#   automl_run = databricks.automl.classify(
+#     dataset = dataset,
+#     target_col = target_col,
+#     timeout_minutes = timeout_minutes
+#   )
+#   experiment_id = automl_run.experiment.experiment_id
+#   path = automl_run.experiment.name
+#   data_run_id = mlflow.search_runs(experiment_ids=[automl_run.experiment.experiment_id], filter_string = "tags.mlflow.source.name='Notebook: DataExploration'").iloc[0].run_id
+#   exploration_notebook_id = automl_run.experiment.tags["_databricks_automl.exploration_notebook_id"]
+#   best_trial_notebook_id = automl_run.experiment.tags["_databricks_automl.best_trial_notebook_id"]
 
-  cols = ["name", "date", "experiment_id", "experiment_path", "data_run_id", "best_trial_run_id", "exploration_notebook_id", "best_trial_notebook_id"]
-  spark.createDataFrame(data=[(name, datetime.today().isoformat(), experiment_id, path, data_run_id, automl_run.best_trial.mlflow_run_id, exploration_notebook_id, best_trial_notebook_id)], schema = cols).write.mode("append").option("mergeSchema", "true").saveAsTable("field_demos_metadata.automl_experiment")
-  #Create & save the first model version in the MLFlow repo (required to setup hooks etc)
-  model_registered = mlflow.register_model(f"runs:/{automl_run.best_trial.mlflow_run_id}/model", model_name)
-  if move_to_production:
-    client = mlflow.tracking.MlflowClient()
-    print("registering model version "+model_registered.version+" as production model")
-    client.transition_model_version_stage(name = model_name, version = model_registered.version, stage = "Production", archive_existing_versions=True)
-  return get_automl_run(name)
+#   cols = ["name", "date", "experiment_id", "experiment_path", "data_run_id", "best_trial_run_id", "exploration_notebook_id", "best_trial_notebook_id"]
+#   spark.createDataFrame(data=[(name, datetime.today().isoformat(), experiment_id, path, data_run_id, automl_run.best_trial.mlflow_run_id, exploration_notebook_id, best_trial_notebook_id)], schema = cols).write.mode("append").option("mergeSchema", "true").saveAsTable("field_demos_metadata.automl_experiment")
+#   #Create & save the first model version in the MLFlow repo (required to setup hooks etc)
+#   model_registered = mlflow.register_model(f"runs:/{automl_run.best_trial.mlflow_run_id}/model", model_name)
+#   if move_to_production:
+#     client = mlflow.tracking.MlflowClient()
+#     print("registering model version "+model_registered.version+" as production model")
+#     client.transition_model_version_stage(name = model_name, version = model_registered.version, stage = "Production", archive_existing_versions=True)
+#   return get_automl_run(name)
 
-#Generate nice link for the given auto ml run
-def display_automl_link(name, model_name, dataset, target_col, timeout_minutes = 5, move_to_production = False):
-  r = get_automl_run_or_start(name, model_name, dataset, target_col, timeout_minutes, move_to_production)
-  html = f"""For exploratory data analysis, open the <a href="/#notebook/{r["exploration_notebook_id"]}">data exploration notebook</a><br/><br/>"""
-  html += f"""To view the best performing model, open the <a href="/#notebook/{r["best_trial_notebook_id"]}">best trial notebook</a><br/><br/>"""
-  html += f"""To view details about all trials, navigate to the <a href="/#mlflow/experiments/{r["experiment_id"]}/s?orderByKey=metrics.%60val_f1_score%60&orderByAsc=false">MLflow experiment</>"""
-  displayHTML(html)
+# #Generate nice link for the given auto ml run
+# def display_automl_link(name, model_name, dataset, target_col, timeout_minutes = 5, move_to_production = False):
+#   r = get_automl_run_or_start(name, model_name, dataset, target_col, timeout_minutes, move_to_production)
+#   html = f"""For exploratory data analysis, open the <a href="/#notebook/{r["exploration_notebook_id"]}">data exploration notebook</a><br/><br/>"""
+#   html += f"""To view the best performing model, open the <a href="/#notebook/{r["best_trial_notebook_id"]}">best trial notebook</a><br/><br/>"""
+#   html += f"""To view details about all trials, navigate to the <a href="/#mlflow/experiments/{r["experiment_id"]}/s?orderByKey=metrics.%60val_f1_score%60&orderByAsc=false">MLflow experiment</>"""
+#   displayHTML(html)
 
-def reset_automl_run(model_name):
-  spark.sql(f"delete from field_demos_metadata.automl_experiment where name='{model_name}'")
+# def reset_automl_run(model_name):
+#   spark.sql(f"delete from field_demos_metadata.automl_experiment where name='{model_name}'")
 
 # COMMAND ----------
 

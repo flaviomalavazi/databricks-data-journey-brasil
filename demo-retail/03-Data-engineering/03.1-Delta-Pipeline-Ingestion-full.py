@@ -76,18 +76,17 @@ display_slide('1KvjJCUgie81u-0lb4bG2Fivd6qEzgjC3jhq46NpDyls', '11') #hide this c
 # COMMAND ----------
 
 # DBTITLE 1,This is the data being delivered in our cloud storage. Let's explore the raw json files
-# MAGIC %fs ls /mnt/field-demos/retail/users_json
+dbutils.fs.ls(f"""{json_directory}/""")
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC -- As you can see, we have lot of small json files. Let's run a SQL query to explore the data0
-# MAGIC select * from json.`/mnt/field-demos/retail/users_json`
+# -- As you can see, we have lot of small json files. Let's run a SQL query to explore the data0
+spark.sql(f"""select * from json.`{json_directory}`""").limit(100).display()
 
 # COMMAND ----------
 
 # DBTITLE 1,Databricks can analyse your data in a single line of code
-dbutils.data.summarize(spark.read.format("json").load("/mnt/field-demos/retail/users_json"))
+dbutils.data.summarize(spark.read.format("json").load(f"{json_directory}"))
 
 # COMMAND ----------
 
@@ -136,7 +135,7 @@ bronze_products = (spark.readStream
                             .option("cloudFiles.format", "json")
                             .option("cloudFiles.maxFilesPerTrigger", "1")  #demo only, remove in real stream
                             .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_bronze") #Autoloader will automatically infer all the schema & evolution
-                            .load("/mnt/field-demos/retail/users_json"))
+                            .load(f"{json_directory}"))
 
 (bronze_products.writeStream
                   .option("checkpointLocation", cloud_storage_path+"/checkpoint_bronze") #exactly once delivery on Delta tables over restart/kill
@@ -187,21 +186,32 @@ bronze_products = (spark.readStream
 
 # COMMAND ----------
 
+dbutils.fs.rm(cloud_storage_path+"/checkpoint_spend/", True)
+
+# COMMAND ----------
+
 # DBTITLE 1,Loading user spending score
 # This could be written in SQL with a COPY INTO spend_silver FROM xxx FILEFORMAT = CSV
-(spark.readStream
+silver_spend = (spark.readStream
         .format("cloudFiles") 
         .option("cloudFiles.format", "csv") 
-        .option("cloudFiles.schemaHints", "age int, annual_income int, spending_core int") #schema subset for evolution / new field
-        .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_spend") #Autoloader will automatically infer all the schema & evolution
-        .load("/mnt/field-demos/retail/spend_csv")
-      .withColumn("id", col("id").cast("int"))
-      .writeStream
-        .trigger(once=True)
-        .option("checkpointLocation", cloud_storage_path+"/checkpoint_spend")
-        .table("spend_silver").awaitTermination())
+        .option("cloudFiles.schemaHints", "age int, annual_income int, spending_core int") # schema subset for evolution / new field
+        .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_spend") # Autoloader will automatically infer all the schema & evolution
+        .load(f"{csv_directory}")).withColumn("id", col("id").cast("int"))
+
+(
+  silver_spend
+  .writeStream
+  .trigger(once=True)
+  .option("checkpointLocation", cloud_storage_path+"/checkpoint_spend")
+  .table("spend_silver").awaitTermination()
+)
 
 spark.read.table("spend_silver").display()
+
+# COMMAND ----------
+
+# MAGIC %sql describe history spend_silver;
 
 # COMMAND ----------
 
