@@ -23,10 +23,6 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 
 # COMMAND ----------
 
-display_slide('1KvjJCUgie81u-0lb4bG2Fivd6qEzgjC3jhq46NpDyls', '11') #hide this code
-
-# COMMAND ----------
-
 # MAGIC %md-sandbox ## Preparing the data with Delta Lake
 # MAGIC To deliver final outcomes such as segmentation, product classification or forecasting, we need to gather, process and clean the incoming data.
 # MAGIC 
@@ -183,10 +179,6 @@ bronze_products = (spark.readStream
 # MAGIC <img style="float:right" width="400px" src="https://github.com/QuentinAmbard/databricks-demo/raw/main/retail/resources/images/retail-ingestion-step3.png"/>
 # MAGIC 
 # MAGIC Our customer spend information is delivered by the finance team on another stream in csv file. Let's ingest this data using the auto-loader as previously: 
-
-# COMMAND ----------
-
-dbutils.fs.rm(cloud_storage_path+"/checkpoint_spend/", True)
 
 # COMMAND ----------
 

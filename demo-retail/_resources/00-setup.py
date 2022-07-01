@@ -7,13 +7,17 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 
 # COMMAND ----------
 
+username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
+
+csv_directory = f"""/user/{username}/demo-retail/_data/spend_csv/"""
+
 (spark.readStream
         .format("cloudFiles") 
         .option("cloudFiles.format", "csv") 
         .option("cloudFiles.schemaHints", "age int, annual_income int, spending_core int") #schema subset for evolution / new field
         .option("cloudFiles.maxFilesPerTrigger", "10") 
         .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_spend") #Autoloader will automatically infer all the schema & evolution
-        .load("/mnt/field-demos/retail/spend_csv")
+        .load(f"{csv_directory}")
       .withColumn("id", col("id").cast("int"))
       .writeStream
         .trigger(once=True)
