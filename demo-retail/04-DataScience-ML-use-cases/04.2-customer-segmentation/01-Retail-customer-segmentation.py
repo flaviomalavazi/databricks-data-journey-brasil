@@ -37,12 +37,8 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 
 # COMMAND ----------
 
-# MAGIC %sql select id, firstname, age, annual_income, spending_core, email, last_activity_date from customer_gold_segmentation order by id
-
-# COMMAND ----------
-
 # DBTITLE 1,Data exploration & visualization
-customer_segmentation = spark.read.table("customer_gold_segmentation").toPandas()
+customer_segmentation = spark.read.table("user_gold_dlt").toPandas()
 g = sns.PairGrid(customer_segmentation[['age','annual_income','spending_core']], diag_sharey=False)
 
 g.map_lower(sns.kdeplot)
@@ -141,14 +137,14 @@ with mlflow.start_run(run_id):
 # DBTITLE 1,Save our new model to the registry as a new version
 #get the best model from the registry
 best_model = mlflow.search_runs(filter_string='attributes.status = "FINISHED" and tags.field_demos = "retail_segmentation"', max_results=1).iloc[0]
-model_registered = mlflow.register_model("runs:/"+best_model.run_id+"/kmeans", "field_demos_customer_segmentation")
+model_registered = mlflow.register_model("runs:/"+best_model.run_id+"/kmeans", "demos_retail_customer_segmentation")
 
 # COMMAND ----------
 
 # DBTITLE 1,Flag this version as production ready
 client = mlflow.tracking.MlflowClient()
 print("registering model version "+model_registered.version+" as production model")
-client.transition_model_version_stage(name = "field_demos_customer_segmentation", version = model_registered.version, stage = "Production", archive_existing_versions=True)
+client.transition_model_version_stage(name = "demos_retail_customer_segmentation", version = model_registered.version, stage = "Production", archive_existing_versions=True)
 
 # COMMAND ----------
 
@@ -166,13 +162,13 @@ client.transition_model_version_stage(name = "field_demos_customer_segmentation"
 #                                                                                        Stage/version
 #                                                                 Model name                   |
 #                                                                     |                        |
-get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/field_demos_customer_segmentation/Production", "string")
+get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/demos_retail_customer_segmentation/Production", "string")
 spark.udf.register("get_customer_segmentation_cluster", get_cluster_udf)
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select *, get_customer_segmentation_cluster(age, annual_income, spending_core) as segment from customer_gold_segmentation
+# MAGIC select *, get_customer_segmentation_cluster(age, annual_income, spending_core) as segment from user_gold_dlt
 
 # COMMAND ----------
 
@@ -181,8 +177,8 @@ spark.udf.register("get_customer_segmentation_cluster", get_cluster_udf)
 
 # COMMAND ----------
 
-model = mlflow.pyfunc.load_model("models:/field_demos_customer_segmentation/Production")
-df = spark.sql("select age, annual_income, spending_core from customer_gold_segmentation limit 10").toPandas()
+model = mlflow.pyfunc.load_model("models:/demos_retail_customer_segmentation/Production")
+df = spark.sql("select age, annual_income, spending_core from user_gold_dlt limit 10").toPandas()
 df['cluster'] = model.predict(df)
 df
 

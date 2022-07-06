@@ -52,7 +52,7 @@ CREATE STREAMING LIVE TABLE users_bronze_dlt (
   CONSTRAINT correct_schema EXPECT (_rescued_data IS NULL)
 )
 COMMENT "raw user data coming from json files ingested in incremental with Auto Loader to support schema inference and evolution"
-AS SELECT * FROM cloud_files("/mnt/field-demos/retail/users_json", "json")
+AS SELECT * FROM cloud_files("${json_directory}", "json")
 
 -- COMMAND ----------
 
@@ -105,7 +105,7 @@ CREATE INCREMENTAL LIVE TABLE spend_silver_dlt (
   CONSTRAINT valid_id EXPECT (id IS NOT NULL and id > 0)
 )
 COMMENT "Spending score from raw data"
-AS SELECT * FROM cloud_files("/mnt/field-demos/retail/spend_csv", "csv", map("cloudFiles.schemaHints", "id int, age int, annual_income float, spending_core float"))
+AS SELECT * FROM cloud_files("${csv_directory}", "csv", map("cloudFiles.schemaHints", "id int, age int, annual_income float, spending_core float"))
 
 -- COMMAND ----------
 
@@ -134,7 +134,7 @@ AS SELECT * FROM STREAM(live.user_silver_dlt) LEFT JOIN live.spend_silver_dlt US
 -- COMMAND ----------
 
 -- MAGIC %md-sandbox
--- MAGIC ## 5/ Enriching the gold data with a ML model
+-- MAGIC ## 5/ Enriching the gold data with a ML model (soon...)
 -- MAGIC <div style="float:right">
 -- MAGIC   <img width="500px" src="https://github.com/QuentinAmbard/databricks-demo/raw/main/retail/resources/images/retail-ingestion-dlt-step5.png"/>
 -- MAGIC </div>
@@ -146,19 +146,21 @@ AS SELECT * FROM STREAM(live.user_silver_dlt) LEFT JOIN live.spend_silver_dlt US
 -- COMMAND ----------
 
 -- DBTITLE 1,Load the model as SQL function
--- MAGIC %python
--- MAGIC #                                                                                         Stage/version    output
--- MAGIC #                                                                 Model name                     |            |
--- MAGIC #                                                                     |                          |            |
--- MAGIC get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/field_demos_customer_segmentation/Production", "string")
--- MAGIC spark.udf.register("get_customer_segmentation_cluster", get_cluster_udf)
+-- %python
+-- # This cell will be executed in the second notebook attached in the DLT pipeline as we are not able to mix langugages on DLT yet
+-- #                                                                                         Stage/version    output
+-- #                                                                 Model name                     |            |
+-- #                                                                     |                          |            |
+-- # import mlflow
+-- # get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/demos_retail_customer_segmentation/Production", "string")
+-- # spark.udf.register("get_customer_segmentation_cluster", get_cluster_udf)
 
 -- COMMAND ----------
 
--- DBTITLE 1,Calling our ML model
-CREATE STREAMING LIVE TABLE user_segmentation_dlt
-COMMENT "Customer segmentation generated with our model from MLFlow registry"
-AS SELECT *, get_customer_segmentation_cluster(age, annual_income, spending_core) AS segment FROM STREAM(live.user_gold_dlt)
+-- DBTITLE 1,Calling our ML model (soon...)
+-- CREATE OR REFRESH STREAMING LIVE TABLE user_segmentation_dlt
+-- COMMENT "Customer segmentation generated with our model from MLFlow registry"
+-- AS SELECT *, get_customer_segmentation_cluster(age, annual_income, spending_core) AS segment FROM STREAM(live.user_gold_dlt)
 
 -- COMMAND ----------
 

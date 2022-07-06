@@ -20,46 +20,8 @@
 # COMMAND ----------
 
 import mlflow
-get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/field_demos_customer_segmentation/Production", "string")
+# #                                                                                         Stage/version    output
+# #                                                                 Model name                     |            |
+# #                                                                     |                          |            |
+get_cluster_udf = mlflow.pyfunc.spark_udf(spark, "models:/demos_retail_customer_segmentation/Production", "string")
 spark.udf.register("get_customer_segmentation_cluster", get_cluster_udf)
-
-# COMMAND ----------
-
-# MAGIC %md ### Setting up the DLT 
-# MAGIC 
-# MAGIC Here is a setting example including the python UDF and the SQL function. Note the multiple entries (1 per notebook) in the "libraries" option:
-# MAGIC 
-# MAGIC ```
-# MAGIC {
-# MAGIC     "id": "95f28631-1884-425e-af69-05c3f397dd90",
-# MAGIC     "name": "field_demos_retail",
-# MAGIC     "storage": "/Users/quentin.ambard@databricks.com/field_demos_retail/dlt",
-# MAGIC     "configuration": {
-# MAGIC         "pipelines.useV2DetailsPage": "true"
-# MAGIC     },
-# MAGIC     "clusters": [
-# MAGIC         {
-# MAGIC             "label": "default",
-# MAGIC             "autoscale": {
-# MAGIC                 "min_workers": 1,
-# MAGIC                 "max_workers": 5
-# MAGIC             }
-# MAGIC         }
-# MAGIC     ],
-# MAGIC     "libraries": [
-# MAGIC         {
-# MAGIC             "notebook": {
-# MAGIC                 "path": "/Repos/quentin.ambard@databricks.com/field-demo/demo-retail/02-Delta-Live-Table/02.1bis-SQL-Delta-Live-Table-Python-UDF"
-# MAGIC             }
-# MAGIC         },
-# MAGIC         {
-# MAGIC             "notebook": {
-# MAGIC                 "path": "/Repos/quentin.ambard@databricks.com/field-demo/demo-retail/02-Delta-Live-Table/02.1-SQL-Delta-Live-Table-Ingestion"
-# MAGIC             }
-# MAGIC         }
-# MAGIC     ],
-# MAGIC     "target": "retail_quentin_ambard",
-# MAGIC     "continuous": false,
-# MAGIC     "development": false
-# MAGIC }
-# MAGIC ```
