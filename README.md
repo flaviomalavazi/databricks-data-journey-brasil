@@ -13,8 +13,11 @@ Repositório com as demonstrações e dados compartilhadas durante os webinars d
 3. Crie um cluster para utilizar durante as execuções dos cadernos desta demonstração
     - [Criar clusters no Databricks](https://docs.databricks.com/clusters/create.html) 
 4. Escolha a demonstração que deseja executar
+    - [Engenharia de dados em pipeline](https://github.com/flaviomalavazi/databricks-data-journey-brasil/tree/main/demo-retail/03-Data-engineering)
+    - [Engenharia de dados em Delta Live Tables](https://github.com/flaviomalavazi/databricks-data-journey-brasil/tree/main/demo-retail/02-Delta-Live-Table)
 5. Siga o passo a passo da sua demonstração de preferência
-
+    - [Engenharia de dados em pipeline](https://github.com/flaviomalavazi/databricks-data-journey-brasil/blob/main/demo-retail/03-Data-engineering/Data-engineering-03-readme.md)
+    - [Engenharia de dados em Delta Live Tables](https://github.com/flaviomalavazi/databricks-data-journey-brasil/blob/main/demo-retail/02-Delta-Live-Table/Delta-Live-Table-02-readme.md)
 ## Ajuda e comunidade Databricks Brasil
 ---
 - Junte-se ao canal [Databricks Comunidade Brasil](https://bit.ly/databricks-slack-br) no Slack!
