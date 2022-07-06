@@ -11,18 +11,22 @@ username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().use
 
 csv_directory = f"""/user/{username}/demo-retail/_data/spend_csv/"""
 
-(spark.readStream
-        .format("cloudFiles") 
-        .option("cloudFiles.format", "csv") 
-        .option("cloudFiles.schemaHints", "age int, annual_income int, spending_core int") #schema subset for evolution / new field
-        .option("cloudFiles.maxFilesPerTrigger", "10") 
-        .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_spend") #Autoloader will automatically infer all the schema & evolution
-        .load(f"{csv_directory}")
-      .withColumn("id", col("id").cast("int"))
-      .writeStream
-        .trigger(once=True)
-        .option("checkpointLocation", cloud_storage_path+"/checkpoint_spend")
-        .table("spend_silver"))
+try:
+    (spark.readStream
+            .format("cloudFiles") 
+            .option("cloudFiles.format", "csv") 
+            .option("cloudFiles.schemaHints", "age int, annual_income int, spending_core int") #schema subset for evolution / new field
+            .option("cloudFiles.maxFilesPerTrigger", "10") 
+            .option("cloudFiles.schemaLocation", cloud_storage_path+"/schema_spend") #Autoloader will automatically infer all the schema & evolution
+            .load(f"{csv_directory}")
+          .withColumn("id", col("id").cast("int"))
+          .writeStream
+            .trigger(once=True)
+            .option("checkpointLocation", cloud_storage_path+"/checkpoint_spend")
+            .table("spend_silver"))
+except Exception as e:
+    if "java.io.FileNotFoundException" not in str(e):
+        raise e
 
 # COMMAND ----------
 

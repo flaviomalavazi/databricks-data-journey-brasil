@@ -29,11 +29,14 @@ mlflow.sklearn.autolog(log_models=False, silent=True)
 
 
 reset_all = dbutils.widgets.get("reset_all_data") == "true"
+# LOCATION '{cloud_storage_path}/tables'
+print(cloud_storage_path)
 if not spark._jsparkSession.catalog().tableExists('customer_gold_segmentation') or reset_all:
-  spark.sql("create table if not exists customer_gold_segmentation using delta location '/mnt/field-demos/retail/customer_segmentation'")
+    pass
+#     spark.sql(f"""create table if not exists customer_gold_segmentation using delta location '{cloud_storage_path}/customer_segmentation'""")
 
 print("segmentation table loaded")
-  
+
 
 # COMMAND ----------
 
