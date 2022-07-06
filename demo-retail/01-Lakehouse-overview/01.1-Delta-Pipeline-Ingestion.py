@@ -22,10 +22,6 @@ dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset al
 
 # COMMAND ----------
 
-display_slide('1KvjJCUgie81u-0lb4bG2Fivd6qEzgjC3jhq46NpDyls', '11') #hide this code
-
-# COMMAND ----------
-
 # MAGIC %md-sandbox 
 # MAGIC 
 # MAGIC ## Preparing the data with Delta Lake
