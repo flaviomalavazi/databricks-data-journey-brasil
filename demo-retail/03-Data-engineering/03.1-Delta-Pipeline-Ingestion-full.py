@@ -1,5 +1,5 @@
 # Databricks notebook source
-#SKIP_ON_DBC_ARCHIVE
+# In order to erase the tables and reset your workspace, change the widget to true and execute the cell 3
 dbutils.widgets.dropdown("reset_all_data", "false", ["true", "false"], "Reset all data")
 
 # COMMAND ----------
