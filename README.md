@@ -9,8 +9,8 @@ Repositório com as demonstrações e dados compartilhadas durante os webinars d
     - [Free Trial Databricks Azure Lakehouse](https://databricks.com/try-databricks-azure?itm_data=AzurePage-HeroTrialButton-AzureTrial)
     - [Free Trial Databricks GCP Lakehouse](https://databricks.com/p/google-cloud-free-trial?itm_data=gcp-toppromo-gcpfreetrial)
     * O Free Trial Databricks não inclui os custos de infra estrutura de núvem (Instâncias, Armazenamento, Rede, etc)
-2. Clone este repositório para o seu workspace Databricks
-    - [Como clonar repositórios git no Databricks](https://docs.databricks.com/repos/work-with-notebooks-other-files.html)
+2. Adicione este repositório para o seu workspace Databricks
+    - [Como adicionar repositórios git no Databricks](https://docs.databricks.com/repos/work-with-notebooks-other-files.html)
 3. Crie um cluster para utilizar durante as execuções dos cadernos desta demonstração. Você vai precisar de um Cluster com a `Databricks runtime version > 10.4` e com as bibliotecas de Machine Learning já instaladas. 
     - [Criar clusters no Databricks](https://docs.databricks.com/clusters/create.html) 
 4. Escolha a demonstração que deseja executar
