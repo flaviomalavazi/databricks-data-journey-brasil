@@ -5,9 +5,9 @@ Repositório com as demonstrações e dados compartilhadas durante os webinars d
 ## Passo a passo para seguir as demonstrações
 ----
 1. Inicie um Trial Databricks em sua núvem de preferência *
-    - [Free Trial Databricks AWS Lakehouse](https://databricks.com/try-databricks-aws?itm_data=AwsPage-TrialButton-AWSTrial)
-    - [Free Trial Databricks Azure Lakehouse](https://databricks.com/try-databricks-azure?itm_data=AzurePage-HeroTrialButton-AzureTrial)
-    - [Free Trial Databricks GCP Lakehouse](https://databricks.com/p/google-cloud-free-trial?itm_data=gcp-toppromo-gcpfreetrial)
+    - [Free Trial Databricks AWS Lakehouse](https://databricks.com/try-databricks)
+    - [Free Trial Databricks Azure Lakehouse](https://databricks.com/try-databricks)
+    - [Free Trial Databricks GCP Lakehouse](https://databricks.com/try-databricks)
     * O Free Trial Databricks não inclui os custos de infra estrutura de núvem (Instâncias, Armazenamento, Rede, etc)
 2. Adicione este repositório para o seu workspace Databricks
     - [Como adicionar repositórios git no Databricks](https://docs.databricks.com/repos/work-with-notebooks-other-files.html)
